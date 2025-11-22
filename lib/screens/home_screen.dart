@@ -20,13 +20,6 @@ class HomeScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_today),
-            tooltip: 'Calendar',
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarScreen()));
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
             onPressed: () {
@@ -46,7 +39,9 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildCycleCard(context, isPeriodActive, cycleService),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                _buildCalendarCard(context),
+                const SizedBox(height: 16),
                 _buildFastingSummary(context, fastingService),
               ],
             ),
@@ -118,17 +113,28 @@ class HomeScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            Text(
-              isPeriodActive 
-                  ? '💐 Take it easy today, sister' 
-                  : '🌸 Predicted: ${DateFormat('MMM d').format(service.nextPeriodPrediction)}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isPeriodActive ? Colors.white.withOpacity(0.9) : AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.favorite_border,
+                  size: 16,
+                  color: isPeriodActive ? Colors.white.withOpacity(0.9) : AppColors.textSecondary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  isPeriodActive 
+                      ? 'Take it easy today, sister' 
+                      : 'Predicted: ${DateFormat('MMM d').format(service.nextPeriodPrediction)}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: isPeriodActive ? Colors.white.withOpacity(0.9) : AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
             const SizedBox(height: 28),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () {
                 if (isPeriodActive) {
                   service.endCycle(DateTime.now());
@@ -145,19 +151,97 @@ class HomeScreen extends StatelessWidget {
                 ),
                 elevation: 5,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(isPeriodActive ? Icons.stop_circle : Icons.play_circle_fill),
-                  const SizedBox(width: 8),
-                  Text(
-                    isPeriodActive ? 'End Period' : 'Start Period',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              icon: Icon(isPeriodActive ? Icons.stop_circle : Icons.play_circle_fill),
+              label: Text(
+                isPeriodActive ? 'End Period' : 'Start Period',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalendarCard(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.secondary.withOpacity(0.3),
+            AppColors.secondary.withOpacity(0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.secondary.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarScreen()));
+          },
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.secondary.withOpacity(0.3),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.calendar_month,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Cycle Calendar',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'View your period history & track fasts',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppColors.secondary,
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -200,9 +284,10 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Text(
-                            '🌙',
-                            style: TextStyle(fontSize: 24),
+                          const Icon(
+                            Icons.nightlight_round,
+                            color: AppColors.textPrimary,
+                            size: 28,
                           ),
                           const SizedBox(width: 8),
                           Text(

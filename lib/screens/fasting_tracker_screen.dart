@@ -44,38 +44,119 @@ class FastingTrackerScreen extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context, FastingService service) {
-    return Row(
+    final today = DateTime.now();
+    final todayLogs = service.logs.where((log) {
+      return log.date.year == today.year &&
+          log.date.month == today.month &&
+          log.date.day == today.day;
+    }).toList();
+
+    final hasMissedToday = todayLogs.any((log) => log.isMissed);
+    final hasMadeUpToday = todayLogs.any((log) => log.isMadeUp);
+
+    return Column(
       children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              // Log missed fast (e.g., for today)
-              service.logMissedFast(DateTime.now());
-            },
-            icon: const Icon(Icons.add_circle_outline),
-            label: const Text('Missed Fast'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionButton(
+                context: context,
+                label: 'Missed Fast',
+                icon: Icons.add_circle_outline,
+                color: AppColors.error,
+                isLogged: hasMissedToday,
+                onPressed: hasMissedToday
+                    ? null
+                    : () {
+                        service.logMissedFast(DateTime.now());
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Missed fast logged for today'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+              ),
             ),
-          ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildActionButton(
+                context: context,
+                label: 'Made Up Fast',
+                icon: Icons.check_circle_outline,
+                color: AppColors.success,
+                isLogged: hasMadeUpToday,
+                onPressed: hasMadeUpToday
+                    ? null
+                    : () {
+                        service.logMadeUpFast(DateTime.now());
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Made-up fast logged for today'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              // Log made up fast
-              service.logMadeUpFast(DateTime.now());
-            },
-            icon: const Icon(Icons.check_circle_outline),
-            label: const Text('Made Up Fast'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-              foregroundColor: Colors.white,
-            ),
+        const SizedBox(height: 12),
+        Text(
+          'Tip: Use calendar to log fasts for other dates',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSecondary,
+            fontStyle: FontStyle.italic,
           ),
+          textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required String label,
+    required IconData icon,
+    required Color color,
+    required bool isLogged,
+    required VoidCallback? onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isLogged ? color.withOpacity(0.3) : Colors.transparent,
+          width: 2,
+        ),
+      ),
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(isLogged ? Icons.check_circle : icon),
+        label: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label),
+            if (isLogged)
+              Text(
+                'Logged',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+          ],
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isLogged ? color.withOpacity(0.2) : color,
+          foregroundColor: isLogged ? color : Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: isLogged ? 0 : 2,
+        ),
+      ),
     );
   }
 
