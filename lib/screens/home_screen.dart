@@ -15,16 +15,20 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Floral Flow'),
+        title: const Text('Floral Flow',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_today),
+            tooltip: 'Calendar',
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarScreen()));
             },
           ),
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
             },
@@ -53,32 +57,77 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildCycleCard(BuildContext context, bool isPeriodActive, CycleService service) {
-    return Card(
+    final daysUntilNext = service.nextPeriodPrediction.difference(DateTime.now()).inDays;
+    final displayTitle = isPeriodActive 
+        ? 'Period Day ${service.currentCycle?.duration}' 
+        : daysUntilNext > 0 
+            ? 'Period in $daysUntilNext days' 
+            : daysUntilNext == 0 
+                ? 'Period expected today!' 
+                : 'No cycle data yet';
+    
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isPeriodActive 
+              ? [AppColors.primaryLight, AppColors.primary]
+              : [Colors.white, AppColors.background],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
           children: [
-            Icon(
-              isPeriodActive ? Icons.water_drop : Icons.favorite,
-              size: 48,
-              color: isPeriodActive ? AppColors.primary : AppColors.secondaryDark,
+            // Decorative flower icon with glow effect
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: (isPeriodActive ? AppColors.primary : AppColors.secondaryDark).withOpacity(0.3),
+                    blurRadius: 15,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Icon(
+                isPeriodActive ? Icons.water_drop : Icons.local_florist,
+                size: 48,
+                color: isPeriodActive ? AppColors.primary : AppColors.secondaryDark,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
-              isPeriodActive ? 'Period Day ${service.currentCycle?.duration}' : 'Period in X Days',
+              displayTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: isPeriodActive ? Colors.white : AppColors.textPrimary,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
-              isPeriodActive ? 'Take it easy today, sister.' : 'Predicted: ${DateFormat('MMM d').format(service.nextPeriodPrediction)}',
+              isPeriodActive 
+                  ? '💐 Take it easy today, sister' 
+                  : '🌸 Predicted: ${DateFormat('MMM d').format(service.nextPeriodPrediction)}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: isPeriodActive ? Colors.white.withOpacity(0.9) : AppColors.textSecondary,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             ElevatedButton(
               onPressed: () {
                 if (isPeriodActive) {
@@ -88,9 +137,25 @@ class HomeScreen extends StatelessWidget {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: isPeriodActive ? AppColors.secondary : AppColors.primary,
+                backgroundColor: isPeriodActive ? Colors.white : AppColors.primary,
+                foregroundColor: isPeriodActive ? AppColors.primary : Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                elevation: 5,
               ),
-              child: Text(isPeriodActive ? 'Log Period End' : 'Log Period Start'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(isPeriodActive ? Icons.stop_circle : Icons.play_circle_fill),
+                  const SizedBox(width: 8),
+                  Text(
+                    isPeriodActive ? 'End Period' : 'Start Period',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -99,52 +164,105 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildFastingSummary(BuildContext context, FastingService service) {
-    return Card(
-      color: AppColors.ramadanGold,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const FastingTrackerScreen()));
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Missed Fasts',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.ramadanGold.withOpacity(0.8),
+            AppColors.ramadanGold,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.ramadanGold.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const FastingTrackerScreen()));
+          },
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            '🌙',
+                            style: TextStyle(fontSize: 24),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Qada Fasts',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${service.remainingFastsToMakeUp} pending',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(height: 12),
+                      Text(
+                        '${service.remainingFastsToMakeUp} remaining',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Tap to manage',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'Tap to track',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward,
+                    color: AppColors.primaryDark,
+                    size: 28,
+                  ),
                 ),
-                child: const Icon(Icons.nightlight_round, color: AppColors.primaryDark),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

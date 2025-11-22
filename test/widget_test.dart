@@ -50,9 +50,9 @@ void main() {
 
     // Verify that our title is present.
     expect(find.text('Floral Flow'), findsOneWidget);
-    expect(find.text('Missed Fasts'), findsOneWidget);
+    expect(find.text('Qada Fasts'), findsOneWidget);
     
     // Verify initial state
-    expect(find.text('0 pending'), findsOneWidget);
+    expect(find.text('0 remaining'), findsOneWidget);
   });
 }

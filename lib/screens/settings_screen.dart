@@ -56,6 +56,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showCycleLengthDialog() {
+    final controller = TextEditingController(text: _manualCycleLength?.toString() ?? '');
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -66,23 +68,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const Text('Enter the average number of days in your cycle:'),
             const SizedBox(height: 16),
             TextField(
+              controller: controller,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Days',
+                labelText: 'Days (10-60)',
                 border: OutlineInputBorder(),
               ),
-              controller: TextEditingController(
-                text: _manualCycleLength?.toString() ?? '',
-              ),
-              onSubmitted: (value) {
-                final intValue = int.tryParse(value);
-                if (intValue != null && intValue >= 10 && intValue <= 60) {
-                  _setManualCycleLength(intValue);
-                  Navigator.pop(context);
-                }
-              },
+              autofocus: true,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             TextButton(
               onPressed: () {
                 _setManualCycleLength(null);
@@ -97,12 +91,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              final intValue = int.tryParse(controller.text);
+              if (intValue != null && intValue >= 10 && intValue <= 60) {
+                _setManualCycleLength(intValue);
+                Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a value between 10 and 60')),
+                );
+              }
+            },
+            child: const Text('OK'),
+          ),
         ],
       ),
     );
   }
 
   void _showPeriodDurationDialog() {
+    final controller = TextEditingController(text: _manualPeriodDuration?.toString() ?? '');
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -113,23 +123,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const Text('Enter the average number of days your period lasts:'),
             const SizedBox(height: 16),
             TextField(
+              controller: controller,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: 'Days',
+                labelText: 'Days (1-14)',
                 border: OutlineInputBorder(),
               ),
-              controller: TextEditingController(
-                text: _manualPeriodDuration?.toString() ?? '',
-              ),
-              onSubmitted: (value) {
-                final intValue = int.tryParse(value);
-                if (intValue != null && intValue >= 1 && intValue <= 14) {
-                  _setManualPeriodDuration(intValue);
-                  Navigator.pop(context);
-                }
-              },
+              autofocus: true,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             TextButton(
               onPressed: () {
                 _setManualPeriodDuration(null);
@@ -143,6 +145,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final intValue = int.tryParse(controller.text);
+              if (intValue != null && intValue >= 1 && intValue <= 14) {
+                _setManualPeriodDuration(intValue);
+                Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a value between 1 and 14')),
+                );
+              }
+            },
+            child: const Text('OK'),
           ),
         ],
       ),
