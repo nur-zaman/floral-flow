@@ -6,6 +6,7 @@ import '../services/fasting_service.dart';
 import '../theme/colors.dart';
 import 'fasting_tracker_screen.dart';
 import 'calendar_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,12 @@ class HomeScreen extends StatelessWidget {
             icon: const Icon(Icons.calendar_today),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarScreen()));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
             },
           ),
         ],
