@@ -1,76 +1,43 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
-import 'screens/profile_screen.dart';
-import 'screens/settings_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
+import 'models/cycle_model.dart';
+import 'models/fasting_log_model.dart';
+import 'services/cycle_service.dart';
+import 'services/fasting_service.dart';
+import 'screens/home_screen.dart';
 
-void main() {
-  runApp(const ModernTemplateApp());
-}
-
-class ModernTemplateApp extends StatelessWidget {
-  const ModernTemplateApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Modern Template',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const MainNavigator(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class MainNavigator extends StatefulWidget {
-  const MainNavigator({super.key});
-
-  @override
-  State<MainNavigator> createState() => _MainNavigatorState();
-}
-
-class _MainNavigatorState extends State<MainNavigator> {
-  int _currentIndex = 0;
+void main() async {
+  // Initialize Hive
+  await Hive.initFlutter(); 
   
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const ProfileScreen(),
-    const SettingsScreen(),
-  ];
+  // Register Adapters
+  Hive.registerAdapter(CycleAdapter());
+  Hive.registerAdapter(FastingLogAdapter());
+  
+  // Open Boxes
+  await Hive.openBox<Cycle>(CycleService.boxName);
+  await Hive.openBox<FastingLog>(FastingService.boxName);
+
+  runApp(const PeriodRamadanApp());
+}
+
+class PeriodRamadanApp extends StatelessWidget {
+  const PeriodRamadanApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CycleService()),
+        ChangeNotifierProvider(create: (_) => FastingService()),
+      ],
+      child: MaterialApp(
+        title: 'Floral Flow',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        home: const HomeScreen(),
       ),
     );
   }

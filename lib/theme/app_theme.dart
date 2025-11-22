@@ -1,77 +1,85 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'colors.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF6750A4);
-  static const Color secondaryColor = Color(0xFF625B71);
-  static const Color surfaceColor = Color(0xFFFFFBFE);
-  static const Color errorColor = Color(0xFFBA1A1A);
-
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
+        seedColor: AppColors.primary,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        surface: AppColors.surface,
+        background: AppColors.background,
+        error: AppColors.error,
         brightness: Brightness.light,
       ),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 1,
+      scaffoldBackgroundColor: AppColors.background,
+      
+      // Typography
+      textTheme: GoogleFonts.quicksandTextTheme().apply(
+        bodyColor: AppColors.textPrimary,
+        displayColor: AppColors.textPrimary,
       ),
+      
+      // AppBar Theme
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        titleTextStyle: GoogleFonts.quicksand(
+          color: AppColors.textPrimary,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      
+      // Card Theme
       cardTheme: CardTheme(
+        color: AppColors.surface,
         elevation: 2,
+        shadowColor: AppColors.primary.withOpacity(0.2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
       ),
+      
+      // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          textStyle: GoogleFonts.quicksand(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
         ),
       ),
+      
+      // Input Decoration
       inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
         filled: true,
-      ),
-    );
-  }
-
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
-        brightness: Brightness.dark,
-      ),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 1,
-      ),
-      cardTheme: CardTheme(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
+        fillColor: AppColors.surface,
+        border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        filled: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
     );
   }

@@ -1,214 +1,89 @@
 import 'package:flutter/material.dart';
-import '../widgets/feature_card.dart';
-import '../widgets/stats_widget.dart';
-import '../models/user_model.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../services/cycle_service.dart';
+import '../services/fasting_service.dart';
+import '../theme/colors.dart';
+import 'fasting_tracker_screen.dart';
+import 'calendar_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  int _counter = 0;
-  final User _user = User(name: 'Flutter Developer', email: 'dev@flutter.com');
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  void _resetCounter() {
-    setState(() {
-      _counter = 0;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Modern Template'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Floral Flow'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _resetCounter,
-            tooltip: 'Reset Counter',
+            icon: const Icon(Icons.calendar_today),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarScreen()));
+            },
           ),
         ],
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildWelcomeSection(),
-              const SizedBox(height: 24),
-              _buildStatsSection(),
-              const SizedBox(height: 24),
-              _buildFeaturesSection(),
-              const SizedBox(height: 24),
-              _buildCounterSection(),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _incrementCounter,
-        icon: const Icon(Icons.add),
-        label: const Text('Increment'),
+      body: Consumer2<CycleService, FastingService>(
+        builder: (context, cycleService, fastingService, child) {
+          final currentCycle = cycleService.currentCycle;
+          final isPeriodActive = currentCycle != null;
+          
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildCycleCard(context, isPeriodActive, cycleService),
+                const SizedBox(height: 20),
+                _buildFastingSummary(context, fastingService),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildWelcomeSection() {
+  Widget _buildCycleCard(BuildContext context, bool isPeriodActive, CycleService service) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome, ${_user.name}!',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Ready to build amazing Flutter apps?',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsSection() {
-    return Row(
-      children: [
-        Expanded(
-          child: StatsWidget(
-            title: 'Counter',
-            value: _counter.toString(),
-            icon: Icons.touch_app,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: StatsWidget(
-            title: 'Features',
-            value: '5+',
-            icon: Icons.star,
-            color: Theme.of(context).colorScheme.secondary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFeaturesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Features',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1.2,
-          children: [
-            FeatureCard(
-              title: 'Material 3',
-              description: 'Modern design system',
-              icon: Icons.palette,
-              onTap: () => _showFeatureDialog('Material 3'),
-            ),
-            FeatureCard(
-              title: 'Responsive',
-              description: 'Adaptive layouts',
-              icon: Icons.devices,
-              onTap: () => _showFeatureDialog('Responsive Design'),
-            ),
-            FeatureCard(
-              title: 'Animations',
-              description: 'Smooth transitions',
-              icon: Icons.animation,
-              onTap: () => _showFeatureDialog('Animations'),
-            ),
-            FeatureCard(
-              title: 'State Management',
-              description: 'Built-in solutions',
-              icon: Icons.settings_applications,
-              onTap: () => _showFeatureDialog('State Management'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCounterSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(24),
         child: Column(
           children: [
             Icon(
-              Icons.touch_app,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary,
+              isPeriodActive ? Icons.water_drop : Icons.favorite,
+              size: 48,
+              color: isPeriodActive ? AppColors.primary : AppColors.secondaryDark,
             ),
             const SizedBox(height: 16),
             Text(
-              'Tap Counter',
-              style: Theme.of(context).textTheme.titleLarge,
+              isPeriodActive ? 'Period Day ${service.currentCycle?.duration}' : 'Period in X Days',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
+              isPeriodActive ? 'Take it easy today, sister.' : 'Predicted: ${DateFormat('MMM d').format(service.nextPeriodPrediction)}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
               ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                if (isPeriodActive) {
+                  service.endCycle(DateTime.now());
+                } else {
+                  service.startCycle(DateTime.now());
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isPeriodActive ? AppColors.secondary : AppColors.primary,
+              ),
+              child: Text(isPeriodActive ? 'Log Period End' : 'Log Period Start'),
             ),
           ],
         ),
@@ -216,18 +91,55 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _showFeatureDialog(String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: Text('This template includes $feature implementation.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Got it'),
+  Widget _buildFastingSummary(BuildContext context, FastingService service) {
+    return Card(
+      color: AppColors.ramadanGold,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const FastingTrackerScreen()));
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Missed Fasts',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${service.remainingFastsToMakeUp} pending',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Tap to manage',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.nightlight_round, color: AppColors.primaryDark),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
