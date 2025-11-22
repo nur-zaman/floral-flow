@@ -40,6 +40,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     _selectedDay = selectedDay;
                     _focusedDay = focusedDay;
                   });
+                  _showDateActionsDialog(selectedDay, cycleService, fastingService);
                 },
                 onFormatChanged: (format) {
                   if (_calendarFormat != format) {
@@ -73,7 +74,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 calendarBuilders: CalendarBuilders(
                   markerBuilder: (context, date, events) {
                     // Custom markers for Period and Fasting
-                    final isPeriod = _isPeriodDay(date, cycleService);
+                    final isPeriod = cycleService.isPeriodDay(date);
                     final isMissedFast = _isMissedFast(date, fastingService);
                     final isMadeUpFast = _isMadeUpFast(date, fastingService);
 
@@ -129,22 +130,37 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  bool _isPeriodDay(DateTime date, CycleService service) {
-    for (final cycle in service.cycles) {
-      if (cycle.endDate == null) {
-        // Active cycle
-        if (date.isAfter(cycle.startDate.subtract(const Duration(days: 1)))) {
-           return true;
-        }
-      } else {
-        if (date.isAfter(cycle.startDate.subtract(const Duration(days: 1))) && 
-            date.isBefore(cycle.endDate!.add(const Duration(days: 1)))) {
-          return true;
-        }
-      }
-    }
-    return false;
+
+  void _showDateActionsDialog(DateTime date, CycleService cycleService, FastingService fastingService) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Log for ${date.month}/${date.day}/${date.year}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.water_drop, color: AppColors.primary),
+              title: const Text('Log Missed Fast'),
+              onTap: () async {
+                await fastingService.logMissedFast(date);
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.check_circle, color: AppColors.success),
+              title: const Text('Log Made Up Fast'),
+              onTap: () async {
+                await fastingService.logMadeUpFast(date);
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
+
 
   bool _isMissedFast(DateTime date, FastingService service) {
     return service.logs.any((l) => 

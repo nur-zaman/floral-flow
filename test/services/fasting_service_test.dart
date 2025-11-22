@@ -60,4 +60,18 @@ void main() {
     
     expect(service.logs.length, 1);
   });
+
+  test('FastingService can delete a log', () async {
+    final service = FastingService();
+    final date = DateTime(2023, 3, 23);
+    
+    await service.logMissedFast(date);
+    expect(service.missedFastsCount, 1);
+    
+    final log = service.logs.first;
+    await service.deleteLog(log);
+    
+    expect(service.missedFastsCount, 0);
+    expect(service.logs, isEmpty);
+  });
 }
